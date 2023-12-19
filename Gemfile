@@ -8,7 +8,7 @@ gem 'rails', '~> 6.1.7', '>= 6.1.7.6'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3', '~> 1.4'
 # Use Puma as the app server
-gem 'puma', '~> 5.0'
+gem 'puma', '~> 3.11'
 # Use SCSS for stylesheets
 gem 'sass-rails', '>= 6'
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
@@ -23,7 +23,7 @@ gem 'jbuilder', '~> 2.7'
 # gem 'bcrypt', '~> 3.1.7'
 
 # Use Active Storage variant
-# gem 'image_processing', '~> 1.2'
+gem 'image_processing', '~> 1.2'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
@@ -38,19 +38,63 @@ group :development do
   gem 'web-console', '>= 4.1.0'
   # Display performance information such as SQL time and flame graphs for each request in your browser.
   # Can be configured to work on production as well see: https://github.com/MiniProfiler/rack-mini-profiler/blob/master/README.md
-  gem 'rack-mini-profiler', '~> 2.0'
   gem 'listen', '~> 3.3'
+
+  gem 'rack-mini-profiler', '~> 2.0'
+
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
+  gem 'rubocop', require: false
+
+  gem 'rubocop-performance', require: false
+
+  gem 'rubocop-rails', require: false
+
+  gem 'rubocop-rspec'
+
   gem 'spring'
 end
 
 group :test do
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '>= 3.26'
+
   gem 'selenium-webdriver', '>= 4.0.0.rc1'
+
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+
+# #rails g devise:install
+gem 'devise'
+
+gem 'kaminari', '~> 1.2.1'
+
+gem 'pry-byebug', group: :development
+
+gem 'rails-i18n'
+
+gem 'enum_help'
+
+gem 'seed-fu'
+
+gem 'config'
+
+gem 'chartkick'
+
+gem 'dotenv-rails'
+
+group :production do
+  gem 'mysql2'
+end
+
+gem 'net-smtp'
+
+gem 'net-pop'
+
+gem 'net-imap'
+
+gem 'rspec-rails'
