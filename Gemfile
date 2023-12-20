@@ -71,6 +71,14 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 # #rails g devise:install
 gem 'devise'
 
+# 権限の管理
+# rails g cancan:ability
+gem 'cancancan'
+
+# ロールの管理
+# rails g rolify Role モデル名
+gem 'rolify'
+
 gem 'kaminari', '~> 1.2.1'
 
 gem 'pry-byebug', group: :development
