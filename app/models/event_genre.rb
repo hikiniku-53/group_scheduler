@@ -1,0 +1,2 @@
+class EventGenre < ApplicationRecord
+end
