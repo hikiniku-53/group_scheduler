@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-class Groups::RegistrationsController < Devise::RegistrationsController
-
+class Members::RegistrationsController < Devise::RegistrationsController
   ## ログイン中の:new, :createへのアクセスを許可
   ## prepend_before_action :require_no_authentication, only: [:new, :create, :cancel]→
   prepend_before_action :require_no_authentication, only: [:cancel]
+  prepend_before_action :authenticate_scope!, only: [:update, :destroy]
 
   # before_action :configure_sign_up_params, only: [:create]
   # before_action :configure_account_update_params, only: [:update]
@@ -12,7 +12,7 @@ class Groups::RegistrationsController < Devise::RegistrationsController
 
   ## 新規登録権限があるか
   before_action :creatable?, only: [:new, :create]
-
+  before_action :editable?, only: [:edit, :update]
   # GET /resource/sign_up
   # def new
   #   super
@@ -23,8 +23,17 @@ class Groups::RegistrationsController < Devise::RegistrationsController
   def creatable?
     ## raise -> エラーを出力する
     ## ログインしていない->CanCan::AccessDeniedクラスにエラー
-    raise CanCan::AccessDenied unless user_signed_in?
+    raise CanCan::AccessDenied unless member_signed_in?
     ## 権限者としてログインしていない->CanCan::AccessDeniedクラスにエラー
+    if !current_member_is_admin?
+      raise CanCan::AccessDenied
+    end
+  end
+  
+  ##  編集権限の判定(権限者としてログインしているか)
+  def editable?
+    raise CanCan::AccessDenied unless user_signed_in?
+
     if !current_user_is_admin?
       raise CanCan::AccessDenied
     end
@@ -36,14 +45,37 @@ class Groups::RegistrationsController < Devise::RegistrationsController
   # end
 
   # GET /resource/edit
-  # def edit
-  #   super
-  # end
+  def edit
+    if by_admin_member?(params)
+      self.resource = resource_class.to_adapter.get!(params[:id])
+    else
+      authenticate_scope!
+      super
+    end
+  end
 
   # PUT /resource
-  # def update
-  #   super
-  # end
+  def update
+    if by_admin_user?(params)
+      self.resource = resource_class.to_adapter.get!(params[:id])
+    else
+      self.resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)
+    end
+
+    if by_admin_user?(params)
+      resource_updated = update_resource_without_password(resource, account_update_params)
+    else
+      resource_updated = update_resource(resource, account_update_params)
+    end
+  end
+
+  def by_admin_user?(params)
+    params[:id].present? && current_user_is_admin?
+  end
+
+  def update_resource_without_password(resource, params)
+    resource.update_without_password(params)
+  end
 
   # DELETE /resource
   # def destroy
@@ -52,7 +84,7 @@ class Groups::RegistrationsController < Devise::RegistrationsController
 
   # GET /resource/cancel
   # Forces the session data which is usually expired after sign
-  # in to be expired now. This is useful if the user wants to
+  # in to be expired now. This is useful if the member wants to
   # cancel oauth signing in/up in the middle of the process,
   # removing all OAuth session data.
   # def cancel
@@ -63,8 +95,8 @@ class Groups::RegistrationsController < Devise::RegistrationsController
   protected
 
   ## 権限者としてログインしているか判別
-  def current_user_is_admin?
-    user_signed_in? && current_user.has_role?(:admin)
+  def current_member_is_admin?
+    member_signed_in? && current_member.has_role?(:admin)
   end
 
 
@@ -94,7 +126,7 @@ class Groups::RegistrationsController < Devise::RegistrationsController
 
   ## 権限者としてログイン中でなければsign_up後にsign_in
   def sign_up(resouece_name, resouece)
-    if !current_user_is_admin?
+    if !current_member_is_admin?
       sign_in(resource_name, resource)
     end
   end
